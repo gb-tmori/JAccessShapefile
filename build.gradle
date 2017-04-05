@@ -1,0 +1,27 @@
+// Apply the java-library plugin to add support for Java Library
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/jp'
+        }
+        resources {
+            srcDir 'src/resources'
+        }
+    }
+}
+
+compileJava.options.encoding = "UTF-8"
+
+jar.baseName = 'jacshp'
+version = '1.0'
