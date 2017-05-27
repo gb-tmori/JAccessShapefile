@@ -14,7 +14,9 @@ import java.util.Set;
 import jp.gbest.gis.shapefile.items.MultiPointItem;
 import jp.gbest.gis.shapefile.items.NullShapeItem;
 import jp.gbest.gis.shapefile.items.PointItem;
+import jp.gbest.gis.shapefile.items.PointMItem;
 import jp.gbest.gis.shapefile.items.PolyLineItem;
+import jp.gbest.gis.shapefile.items.PolyLineMItem;
 import jp.gbest.gis.shapefile.items.PolygonItem;
 import jp.gbest.gis.shapefile.items.ShapeItem;
 
@@ -117,6 +119,14 @@ public class ShapefileReader {
 				}
 				
 				
+				else if (item_type == ShapeItem.TYPE_POINT_M) {
+					double x = buf.getDouble(4);index += 8; // X
+					double y = buf.getDouble(12);index += 8; // Y
+					double m = buf.getDouble(20);index += 8; // Z
+					data.item_list.add(new PointMItem(x, y, m));
+				}
+
+				
 				else if (item_type == ShapeItem.TYPE_MULTIPOINT) {
 					List<PointItem> points = new ArrayList<PointItem>();
 					double x_min = buf.getDouble(4);index += 8; // Xmin
@@ -159,6 +169,43 @@ public class ShapefileReader {
 						points.add(new PointItem(x, y));
 					}
 					data.item_list.add(new PolyLineItem(parts));
+				}
+				
+				
+				
+				else if (item_type == ShapeItem.TYPE_POLYLINE_M) {
+					double x_min = buf.getDouble(4);index += 8; // Xmin
+					double y_min = buf.getDouble(12);index += 8; // Ymin
+					double x_max = buf.getDouble(20);index += 8; // Xmax
+					double y_max = buf.getDouble(28);index += 8; // Ymax
+					int part_num = buf.getInt(36);index += 4; // Part num
+					int point_num = buf.getInt(40);index += 4; // Point num
+					int[] part_index = new int[part_num];
+					
+					List<List<PointItem>> parts = new ArrayList<List<PointItem>>();
+					for (int i=0;i<part_num;i++) {
+						part_index[i] = buf.getInt(44 + 4*i);index += 4;
+					}
+					List<PointItem> points = null;
+					int part_count = 0;
+					for (int i=0;i<point_num;i++) {
+						if (part_count < part_index.length && part_index[part_count] == i) {
+							points = new ArrayList<PointItem>();
+							parts.add(points);
+							part_count++;
+						}
+						double x = buf.getDouble(44 + 4*part_num + 16*i);index += 8; // X
+						double y = buf.getDouble(52 + 4*part_num + 16*i);index += 8; // Y
+						points.add(new PointItem(x, y));
+					}
+					
+					int m_index = 44 + 4*part_num + 16  * point_num;
+					double m_min = buf.getDouble(m_index);index += 8; // Mmin
+					double m_max = buf.getDouble(m_index + 8);index += 8; // Mmax
+					for (int i=0;i<point_num;i++) { 
+						buf.getDouble(m_index + 16 + 8 * i);index += 8; // Mmax
+					}
+					data.item_list.add(new PolyLineMItem(parts));
 				}
 				
 				
@@ -267,8 +314,8 @@ public class ShapefileReader {
 				}
 				
 				if (!is_field_end) {
-					int field_len = field[16];
-					int decimal_len = field[17];
+					int field_len = (byte)field[16] & 0xff;
+					int decimal_len = (byte)field[17] & 0xff;
 					Class<?> field_type = null; 
 					if (field[11] == 'C') field_type = String.class; 
 					else if (field[11] == 'F') field_type = Float.class;

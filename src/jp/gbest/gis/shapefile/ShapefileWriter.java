@@ -320,8 +320,8 @@ public class ShapefileWriter {
 				field[13] = 0; // reserved area
 				field[14] = 0; // reserved area
 				field[15] = 0; // reserved area
-				field[16] = att.field_len;  // field length(binary)
-				field[17] = att.decimal_len; // decimal length (binary)
+				field[16] = (byte)att.field_len;  // field length(binary)
+				field[17] = (byte)att.decimal_len; // decimal length (binary)
 				field[18] = 0; // reserved area
 				field[19] = 0; // reserved area
 				field[20] = 0; // working area id

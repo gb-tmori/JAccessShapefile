@@ -18,14 +18,14 @@ public class ShapeAttribute {
 	/** field tyep (C,D,F,L,M,N) */
 	public Class<?> field_type;
 	/** field length(binary) */
-	public byte field_len = 10;
+	public int field_len = 10;
 	/** 小数分長さ(binary) */
-	public byte decimal_len = 0;
+	public int decimal_len = 0;
 	
 	public ShapeAttribute(String field_name, Class<?> type, int field_len, int decimal_len) {
 		this.field_name = field_name;
 		this.field_type = type;
-		this.field_len = (byte)field_len;
-		this.decimal_len = (byte)decimal_len;
+		this.field_len = field_len;
+		this.decimal_len = decimal_len;
 	}
 }
